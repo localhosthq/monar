@@ -1,0 +1,29 @@
+[env]
+CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
+
+# Build all workspace members
+[tasks.build]
+command = "cargo"
+args = ["build", "--workspace"]
+
+# Run all tests in the workspace
+[tasks.test]
+command = "cargo"
+args = ["test", "--workspace"]
+
+# Run formatting and clippy lints
+[tasks.lint]
+script = [
+    "cargo fmt --all -- --check",
+    "cargo clippy --workspace --all-targets --all-features -- -D warnings"
+]
+
+# Run the main CLI
+[tasks.run-cli]
+command = "cargo"
+args = ["run", "-p", "monar"]
+
+# Clean build artifacts
+[tasks.clean]
+command = "cargo"
+args = ["clean"]

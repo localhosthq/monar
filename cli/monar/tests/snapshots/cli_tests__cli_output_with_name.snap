@@ -1,0 +1,5 @@
+---
+source: cli/monar/tests/cli_tests.rs
+expression: "String::from_utf8(output.stdout).unwrap()"
+---
+Hello, test!

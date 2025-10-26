@@ -1,0 +1,14 @@
+# Rust/Cargo
+/target
+**/target
+Cargo.lock
+
+# MacOS
+.DS_Store
+
+# Logs
+*.log
+
+# Node/npm (for WASM/npm packages)
+node_modules/
+dist/
