@@ -22,21 +22,22 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
-      - name: Cache cargo-make
+      - name: Cache cargo binaries
         uses: actions/cache@v3
         with:
-          path: ~/.cargo/bin/cargo-make
-          key: cargo-make-${{ runner.os }}
+          path: ~/.cargo/bin/
+          key: ${{ runner.os }}-cargo-bins-v1
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           profile: minimal
           override: true
-      - name: Install cargo-make
-        run: cargo install cargo-make || echo "Already installed"
-      - name: Install cargo-audit
-        run: cargo install cargo-audit
+      - name: Install cargo tools
+        shell: bash
+        run: |
+          if ! [ -x "$(command -v cargo-make)" ]; then cargo install cargo-make; fi
+          if ! [ -x "$(command -v cargo-audit)" ]; then cargo install cargo-audit; fi
       - name: Audit dependencies
         run: cargo audit
       - name: Lint
@@ -63,11 +64,11 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
-      - name: Cache cargo-make
+      - name: Cache cargo binaries
         uses: actions/cache@v3
         with:
-          path: ~/.cargo/bin/cargo-make
-          key: cargo-make-${{ runner.os }}
+          path: ~/.cargo/bin/
+          key: ${{ runner.os }}-cargo-bins-v1
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
@@ -75,7 +76,9 @@ jobs:
           profile: minimal
           override: true
       - name: Install cargo-make
-        run: cargo install cargo-make || echo "Already installed"
+        shell: bash
+        run: |
+          if ! [ -x "$(command -v cargo-make)" ]; then cargo install cargo-make; fi
       - name: Test
         run: cargo make test
 
