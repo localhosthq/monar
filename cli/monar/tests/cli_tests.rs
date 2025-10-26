@@ -1,6 +1,11 @@
 use assert_cmd::Command;
 use insta::assert_snapshot;
 
+fn normalize_output(output: &[u8]) -> String {
+    let output_str = String::from_utf8(output.to_vec()).unwrap();
+    output_str.replace("monar.exe", "monar")
+}
+
 #[test]
 fn test_cli_output() {
     let mut cmd = Command::cargo_bin("monar").unwrap();
@@ -22,7 +27,7 @@ fn test_invalid_argument() {
     cmd.arg("--invalid-arg");
     let output = cmd.output().unwrap();
     assert!(!output.status.success());
-    assert_snapshot!(String::from_utf8(output.stderr).unwrap());
+    assert_snapshot!(normalize_output(&output.stderr));
 }
 
 #[test]
@@ -32,5 +37,5 @@ fn test_regression_bug_123() {
     cmd.arg("--some-specific-input-that-caused-a-bug");
     let output = cmd.output().unwrap();
     assert!(!output.status.success());
-    assert_snapshot!(String::from_utf8(output.stderr).unwrap());
+    assert_snapshot!(normalize_output(&output.stderr));
 }
