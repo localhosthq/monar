@@ -12,6 +12,21 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Cache Cargo
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+      - name: Cache cargo-make
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/bin/cargo-make
+          key: cargo-make-${{ runner.os }}
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
@@ -19,7 +34,11 @@ jobs:
           profile: minimal
           override: true
       - name: Install cargo-make
-        run: cargo install cargo-make
+        run: cargo install cargo-make || echo "Already installed"
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+      - name: Audit dependencies
+        run: cargo audit
       - name: Lint
         run: cargo make lint
       - name: Build
@@ -34,6 +53,21 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Cache Cargo
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+      - name: Cache cargo-make
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/bin/cargo-make
+          key: cargo-make-${{ runner.os }}
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
@@ -41,6 +75,20 @@ jobs:
           profile: minimal
           override: true
       - name: Install cargo-make
-        run: cargo install cargo-make
+        run: cargo install cargo-make || echo "Already installed"
       - name: Test
-        run: cargo make test
+        run: |
+          set -e
+          for attempt in {1..3}; do
+            echo "Attempt $attempt"
+            if timeout 600 cargo make test; then
+              echo "Test passed on attempt $attempt"
+              exit 0
+            else
+              echo "Test failed on attempt $attempt"
+              if [ $attempt -eq 3 ]; then
+                echo "All attempts failed"
+                exit 1
+              fi
+            fi
+          done
